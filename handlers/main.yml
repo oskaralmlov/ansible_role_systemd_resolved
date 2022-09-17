@@ -1,0 +1,6 @@
+---
+- name: restart {{ __systemd_resolved_service }}
+  ansible.builtin.systemd:
+    name: "{{ __systemd_resolved_service }}"
+    state: restarted
+

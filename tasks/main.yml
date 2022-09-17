@@ -1,0 +1,40 @@
+---
+- tags: systemd_resolved
+  become: true
+  block:
+
+    - name: Install systemd-resolved
+      ansible.builtin.package:
+        name: systemd-resolved
+        state: present
+
+    - name: Generate {{ _systemd_resolved_config }}
+      ansible.builtin.copy:
+        content: |
+          DNS={{ systemd_resolved_resolvers | join(' ') }}
+          Fallback={{ systemd_resolved_resolvers_fallback | join(' ') }}
+          DNSSEC={{ systemd_resolved_dnssec | string }}
+          DNSOverTLS={{ systemd_resolved_dot | string }}
+        dest: "{{ _systemd_resolved_config }}"
+        mode: 0644
+        owner: root
+        group: root
+      vars:
+        _systemd_resolved_config: /etc/systemd/resolved.conf
+      notify: restart {{ __systemd_resolved_service }}
+
+    - name: Symlink {{ _resolvconf_path }} to {{ _systemd_resolved_stub_config_path }}
+      ansible.builtin.file:
+        src: "{{ _systemd_resolved_stub_config_path }}"
+        dest: "{{ _resolvconf_path }}"
+        state: link
+        force: true
+      vars:
+        _resolvconf_path: /etc/resolv.conf
+        _systemd_resolved_stub_config_path: /run/systemd/resolve/stub-resolv.conf
+
+    - name: Start & enable {{ __systemd_resolved_service }}
+      ansible.builtin.systemd:
+        name: "{{ __systemd_resolved_service }}"
+        state: started
+        enabled: true

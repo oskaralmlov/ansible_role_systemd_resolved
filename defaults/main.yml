@@ -1,0 +1,17 @@
+---
+# A list[str] of hostnames/IP of the resolvers to query.
+systemd_resolved_resolvers: []
+
+# A list[str] of hostnames/IP to use when no other are configured.
+systemd_resolved_resolvers_fallback:
+  - 1.1.1.1 # Cloudflare
+  - 8.8.8.8 # Google
+  - 9.9.9.9 # Quad9
+
+# Takes one of 3 possible arguments:
+# * false: Lookups are not DNSSEC validated locally.
+# * true: All lookups will be DNSSEC validated locally.
+# * allow-downgrade: Attempt DNSSEC validation but disable it if the resolver doesn't support it.
+systemd_resolved_dnssec: allow-downgrade
+
+systemd_resolved_dot: false
